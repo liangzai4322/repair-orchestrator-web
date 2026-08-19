@@ -1,0 +1,413 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <meta name="repair-api-base" content="https://liangzai666.com/repair/api">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; connect-src https://liangzai666.com; img-src data:; base-uri 'none'; form-action 'none'; frame-ancestors 'none'">
+  <title>修复放行台</title>
+  <style>
+:root {
+  --paper: #f7f9fc;
+  --surface: #ffffff;
+  --ink: #17243d;
+  --muted: #68768b;
+  --line: #dbe2ec;
+  --line-strong: #aab6c7;
+  --cobalt: #315cf4;
+  --cobalt-dark: #2444b7;
+  --amber: #d87812;
+  --amber-soft: #fff1da;
+  --red: #bd3d50;
+  --red-soft: #ffeaed;
+  --green: #19745a;
+  --green-soft: #e2f5ee;
+  --display: "Avenir Next", "Trebuchet MS", "PingFang SC", sans-serif;
+  --body: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  --mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  color: var(--ink);
+  background: var(--paper);
+  font-family: var(--body);
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background-image: linear-gradient(rgba(49, 92, 244, .035) 1px, transparent 1px), linear-gradient(90deg, rgba(49, 92, 244, .035) 1px, transparent 1px);
+  background-size: 32px 32px;
+  mask-image: linear-gradient(to bottom, black, transparent 72%);
+}
+
+.telemetry {
+  height: 32px;
+  padding: 0 3vw;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--ink);
+  color: #dbe4f2;
+  font: 11px/1 var(--mono);
+  letter-spacing: .16em;
+}
+
+.shell { width: min(1240px, calc(100% - 40px)); margin: 0 auto; position: relative; }
+
+.masthead {
+  height: 92px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--line-strong);
+}
+
+.wordmark { color: inherit; text-decoration: none; display: flex; align-items: center; gap: 12px; }
+.wordmark-mark { width: 38px; height: 38px; display: grid; place-items: center; color: white; background: var(--cobalt); font: 800 22px/1 var(--display); transform: rotate(-3deg); }
+.wordmark strong { display: block; font: 700 16px/1.2 var(--display); letter-spacing: .06em; }
+.wordmark small { display: block; margin-top: 4px; color: var(--muted); font: 10px/1 var(--mono); text-transform: uppercase; letter-spacing: .08em; }
+.connection { color: var(--muted); font-size: 12px; }
+.connection i { display: inline-block; width: 7px; height: 7px; margin-right: 7px; border-radius: 50%; background: var(--green); box-shadow: 0 0 0 4px var(--green-soft); }
+
+.hidden { display: none !important; }
+.state-panel { min-height: 55vh; display: grid; align-content: center; justify-items: center; text-align: center; }
+.state-panel h1 { margin: 14px 0 6px; font: 700 clamp(36px, 6vw, 72px)/1 var(--display); letter-spacing: -.05em; }
+.state-panel p { max-width: 560px; color: var(--muted); }
+.state-code { color: var(--red); font: 700 12px/1 var(--mono); letter-spacing: .18em; }
+.loader { width: 42px; height: 42px; border: 2px solid var(--line); border-top-color: var(--cobalt); border-radius: 50%; animation: spin .8s linear infinite; }
+
+.approval { display: grid; grid-template-columns: 190px minmax(0, 1fr); gap: 48px; padding: 54px 0 90px; }
+.flight-strip { border-right: 1px solid var(--line-strong); padding-right: 28px; }
+.flight-strip-head { padding-bottom: 18px; border-bottom: 2px solid var(--ink); font: 700 11px/1 var(--mono); letter-spacing: .14em; }
+.flight-strip ol { list-style: none; padding: 24px 0 0; margin: 0; }
+.flight-strip li { position: relative; padding: 0 0 30px 28px; color: var(--muted); font-size: 12px; }
+.flight-strip li::before { content: ""; position: absolute; left: 4px; top: 5px; width: 7px; height: 7px; border: 1px solid var(--line-strong); border-radius: 50%; background: var(--paper); z-index: 1; }
+.flight-strip li::after { content: ""; position: absolute; left: 8px; top: 13px; bottom: -5px; width: 1px; background: var(--line); }
+.flight-strip li:last-child::after { display: none; }
+.flight-strip li.done { color: var(--ink); }
+.flight-strip li.done::before { background: var(--green); border-color: var(--green); }
+.flight-strip li.active { color: var(--cobalt); font-weight: 700; }
+.flight-strip li.active::before { width: 11px; height: 11px; left: 2px; top: 3px; background: var(--cobalt); border: 3px solid var(--paper); box-shadow: 0 0 0 1px var(--cobalt); }
+.flight-strip time { display: block; margin-top: 3px; color: var(--muted); font: 10px/1.4 var(--mono); }
+
+.hero { min-height: 310px; display: flex; justify-content: space-between; align-items: flex-start; gap: 40px; padding: 8px 0 56px; border-bottom: 1px solid var(--line-strong); }
+.eyebrow, .section-label { margin: 0 0 16px; color: var(--cobalt); font: 700 11px/1.2 var(--mono); letter-spacing: .12em; text-transform: uppercase; }
+.hero h1 { margin: 0; font: 750 clamp(52px, 7vw, 92px)/.92 var(--display); letter-spacing: -.065em; }
+.hero h1 em { color: var(--cobalt); font-style: normal; }
+.lede { max-width: 700px; margin: 28px 0 0; color: var(--muted); font-size: 17px; }
+.risk-seal { flex: 0 0 144px; aspect-ratio: 1; display: grid; place-content: center; text-align: center; border: 1px solid var(--amber); border-radius: 50%; background: var(--amber-soft); transform: rotate(4deg); box-shadow: inset 0 0 0 7px var(--paper), inset 0 0 0 8px var(--amber); }
+.risk-seal span { font: 700 10px/1 var(--mono); letter-spacing: .16em; }
+.risk-seal strong { margin: 8px 0; color: var(--amber); font: 750 28px/1 var(--display); }
+.risk-seal small { color: var(--muted); font-size: 10px; }
+.risk-seal[data-risk="high"], .risk-seal[data-risk="critical"] { border-color: var(--red); background: var(--red-soft); box-shadow: inset 0 0 0 7px var(--paper), inset 0 0 0 8px var(--red); }
+.risk-seal[data-risk="high"] strong, .risk-seal[data-risk="critical"] strong { color: var(--red); }
+.risk-seal[data-risk="low"] { border-color: var(--green); background: var(--green-soft); box-shadow: inset 0 0 0 7px var(--paper), inset 0 0 0 8px var(--green); }
+.risk-seal[data-risk="low"] strong { color: var(--green); }
+
+.brief-grid { display: grid; grid-template-columns: 1.25fr .75fr; gap: 1px; margin-top: 28px; background: var(--line); border: 1px solid var(--line); }
+.brief-card { min-height: 220px; padding: 32px; background: var(--surface); }
+.brief-card h2, .section-heading h2 { margin: 0 0 18px; font: 700 27px/1.15 var(--display); letter-spacing: -.03em; }
+.brief-card > p:last-child { color: var(--muted); }
+.policy-card ul { padding-left: 18px; margin: 0; color: var(--muted); }
+
+.ledger { margin-top: 28px; padding: 36px; border: 1px solid var(--line-strong); background: var(--surface); }
+.section-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 20px; padding-bottom: 26px; border-bottom: 2px solid var(--ink); }
+.version-chip { padding: 7px 10px; border: 1px solid var(--line-strong); font: 10px/1 var(--mono); letter-spacing: .08em; }
+.ledger-block { display: grid; grid-template-columns: 180px 1fr; gap: 28px; padding: 27px 0; border-bottom: 1px solid var(--line); }
+.ledger h3 { margin: 0; font: 700 12px/1.4 var(--mono); text-transform: uppercase; letter-spacing: .08em; }
+.change-list, .command-list { display: grid; gap: 12px; }
+.change-item { display: grid; grid-template-columns: minmax(140px, .45fr) 1fr; gap: 16px; }
+.change-item code { color: var(--cobalt-dark); font: 12px/1.5 var(--mono); word-break: break-all; }
+.change-item span { color: var(--muted); font-size: 13px; }
+.command-list code { display: block; padding: 12px 14px; color: #edf2ff; background: var(--ink); font: 12px/1.6 var(--mono); overflow-wrap: anywhere; }
+.empty { color: var(--muted); font-size: 13px; font-style: italic; }
+.ledger-split { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; padding-top: 27px; }
+.ledger-split > div + div { padding-left: 48px; border-left: 1px solid var(--line); }
+.ledger-split p, .ledger-split ul { margin-bottom: 0; color: var(--muted); font-size: 13px; }
+.ledger-split ul { padding-left: 18px; }
+
+.authorization { margin-top: 28px; padding: 30px 34px; color: #edf2ff; background: var(--ink); }
+.hash-lock { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 18px; padding-bottom: 26px; border-bottom: 1px solid rgba(255,255,255,.18); }
+.hash-lock p { margin: 0; color: #b9c4d7; font-size: 13px; }
+.hash-lock strong { color: white; }
+.hash-lock code { max-width: 250px; overflow: hidden; text-overflow: ellipsis; color: #aebfff; font: 10px/1 var(--mono); }
+.lock-icon { width: 36px; height: 36px; display: grid; place-items: center; color: var(--ink); background: white; border-radius: 50%; font-size: 24px; }
+.actions { display: flex; justify-content: flex-end; gap: 12px; padding-top: 26px; }
+.button { min-height: 50px; padding: 0 20px; border: 1px solid transparent; font: 700 13px/1 var(--body); cursor: pointer; transition: transform .15s ease, background .15s ease, color .15s ease; }
+.button:hover { transform: translateY(-2px); }
+.button:focus-visible { outline: 3px solid white; outline-offset: 3px; }
+.button:disabled { cursor: wait; opacity: .5; transform: none; }
+.button.primary { color: white; background: var(--cobalt); }
+.button.primary:hover { background: #4169f5; }
+.button.primary span { margin-left: 18px; }
+.button.secondary { color: #dce4f1; border-color: #64718a; background: transparent; }
+.button.secondary:hover { color: white; border-color: white; }
+.decision-status { min-height: 20px; margin: 14px 0 0; text-align: right; color: #b9c4d7; font-size: 12px; }
+
+@keyframes spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; } }
+
+@media (max-width: 860px) {
+  .shell { width: min(100% - 28px, 720px); }
+  .connection { display: none; }
+  .approval { grid-template-columns: 1fr; gap: 20px; padding-top: 32px; }
+  .flight-strip { border-right: 0; border-bottom: 1px solid var(--line-strong); padding: 0 0 10px; overflow-x: auto; }
+  .flight-strip-head { display: none; }
+  .flight-strip ol { display: flex; min-width: 600px; padding: 0; }
+  .flight-strip li { flex: 1; padding: 24px 12px 12px 0; border-top: 1px solid var(--line); }
+  .flight-strip li::before { left: 0; top: -4px; }
+  .flight-strip li::after { left: 8px; top: 0; bottom: auto; right: 0; width: auto; height: 1px; }
+  .flight-strip li.active::before { left: -2px; top: -6px; }
+  .hero { min-height: 0; }
+  .hero h1 { font-size: clamp(50px, 13vw, 76px); }
+  .brief-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 620px) {
+  .masthead { height: 78px; }
+  .hero { flex-direction: column; }
+  .risk-seal { align-self: flex-end; width: 118px; flex-basis: 118px; margin-top: -22px; }
+  .brief-card, .ledger { padding: 24px; }
+  .ledger-block { grid-template-columns: 1fr; gap: 14px; }
+  .change-item { grid-template-columns: 1fr; gap: 3px; }
+  .ledger-split { grid-template-columns: 1fr; gap: 28px; }
+  .ledger-split > div + div { padding: 28px 0 0; border-left: 0; border-top: 1px solid var(--line); }
+  .authorization { padding: 24px; }
+  .hash-lock { grid-template-columns: auto 1fr; }
+  .hash-lock code { grid-column: 1 / -1; max-width: 100%; }
+  .actions { flex-direction: column-reverse; }
+  .button { width: 100%; }
+}
+
+</style>
+</head>
+<body>
+  <div class="telemetry" aria-hidden="true"><span>REPAIR / CONTROL</span><span id="clock">--:--:--</span></div>
+  <main class="shell">
+    <header class="masthead">
+      <a class="wordmark" href="./approval.html" aria-label="修复放行台首页">
+        <span class="wordmark-mark">R</span>
+        <span><strong>修复放行台</strong><small>Repair clearance desk</small></span>
+      </a>
+      <div class="connection"><i></i> 审批链路已加密</div>
+    </header>
+
+    <section id="loading" class="state-panel" aria-live="polite">
+      <div class="loader" aria-hidden="true"></div>
+      <p>正在校验放行凭证与修复方案…</p>
+    </section>
+
+    <section id="error" class="state-panel hidden" aria-live="assertive">
+      <span class="state-code">LINK EXPIRED</span>
+      <h1>这张放行单已失效</h1>
+      <p id="error-message">审批链接可能已过期、被使用，或方案已经变化。</p>
+    </section>
+
+    <article id="approval" class="approval hidden">
+      <aside class="flight-strip" aria-label="故障处理进度">
+        <div class="flight-strip-head">处理航迹</div>
+        <ol id="timeline"></ol>
+      </aside>
+
+      <div class="content">
+        <section class="hero">
+          <div class="hero-copy">
+            <p class="eyebrow"><span id="source">—</span> · <span id="incident-id">—</span></p>
+            <h1>一项修复，<br><em>等你放行。</em></h1>
+            <p id="incident-summary" class="lede"></p>
+          </div>
+          <div id="risk-seal" class="risk-seal" data-risk="medium">
+            <span>风险</span>
+            <strong id="risk">—</strong>
+            <small id="confidence">置信度 —</small>
+          </div>
+        </section>
+
+        <section class="brief-grid">
+          <div class="brief-card root-cause">
+            <p class="section-label">Codex 判断</p>
+            <h2>根因</h2>
+            <p id="root-cause"></p>
+          </div>
+          <div class="brief-card policy-card">
+            <p class="section-label">策略裁决</p>
+            <h2>为什么需要你确认</h2>
+            <ul id="policy-reasons"></ul>
+          </div>
+        </section>
+
+        <section class="ledger">
+          <div class="section-heading">
+            <div><p class="section-label">执行清单</p><h2>批准后将发生什么</h2></div>
+            <span id="plan-version" class="version-chip">PLAN —</span>
+          </div>
+          <div class="ledger-block">
+            <h3>拟修改文件</h3>
+            <div id="changes" class="change-list"></div>
+          </div>
+          <div class="ledger-block">
+            <h3>拟执行命令</h3>
+            <div id="commands" class="command-list"></div>
+          </div>
+          <div class="ledger-split">
+            <div><h3>验证</h3><ul id="verification"></ul></div>
+            <div><h3>回滚</h3><p id="rollback"></p></div>
+          </div>
+        </section>
+
+        <section class="authorization">
+          <div class="hash-lock">
+            <span class="lock-icon" aria-hidden="true">⌁</span>
+            <p><strong>只批准这一版方案</strong><br>方案发生任何变化，系统都会要求重新确认。</p>
+            <code id="plan-hash">—</code>
+          </div>
+          <div class="actions">
+            <button id="reject" class="button secondary" type="button">拒绝本次修复</button>
+            <button id="approve" class="button primary" type="button">批准并开始修复 <span>→</span></button>
+          </div>
+          <p id="decision-status" class="decision-status" aria-live="polite"></p>
+        </section>
+      </div>
+    </article>
+  </main>
+  <script>
+const $ = (id) => document.getElementById(id);
+const API_BASE = (document.querySelector('meta[name="repair-api-base"]')?.content || '').replace(/\/$/, '');
+const token = new URLSearchParams(location.search).get('token');
+const riskLabels = { low: '低', medium: '中', high: '高', critical: '极高' };
+const statusOrder = ['detected', 'diagnosing', 'awaiting_approval', 'executing', 'verifying', 'resolved'];
+const statusLabels = { detected: '发现故障', diagnosing: 'Codex 诊断', awaiting_approval: '等待放行', approved: '已批准', executing: '执行修复', auto_fixing: '自动修复', verifying: '验证恢复', resolved: '恢复完成', rejected: '已拒绝', failed: '修复失败', rolled_back: '已回滚' };
+
+function policyReason(reason) {
+  const risk = reason.match(/^risk is (.+)$/);
+  if (risk) return `方案风险等级为“${riskLabels[risk[1]] || risk[1]}”`;
+  const files = reason.match(/^changes (\d+) files$/);
+  if (files) return `方案将修改 ${files[1]} 个文件，超过自动修复上限`;
+  if (reason === 'Codex requested human review') return 'Codex 明确要求人工复核';
+  if (reason === 'automatic code patches are disabled') return '自动代码修复尚未启用';
+  if (reason.startsWith('protected path: ')) return `涉及受保护路径：${reason.slice(16)}`;
+  if (reason.startsWith('blocked command pattern: ')) return `包含受限制命令：${reason.slice(25)}`;
+  return reason;
+}
+
+function node(tag, className, text) {
+  const element = document.createElement(tag);
+  if (className) element.className = className;
+  if (text != null) element.textContent = text;
+  return element;
+}
+
+function showError(message) {
+  $('loading').classList.add('hidden');
+  $('approval').classList.add('hidden');
+  $('error').classList.remove('hidden');
+  if (message) $('error-message').textContent = message;
+}
+
+function renderList(target, values, emptyText) {
+  target.replaceChildren();
+  if (!values?.length) return target.append(node('li', 'empty', emptyText));
+  for (const value of values) target.append(node('li', '', value));
+}
+
+function renderTimeline(detail) {
+  const timeline = $('timeline');
+  timeline.replaceChildren();
+  const current = detail.incident.status;
+  const currentIndex = statusOrder.indexOf(current);
+  for (const [index, status] of statusOrder.entries()) {
+    const item = node('li', index < currentIndex ? 'done' : index === currentIndex ? 'active' : '', statusLabels[status]);
+    const transition = detail.transitions.find((entry) => entry.to === status);
+    if (transition) item.append(node('time', '', new Date(transition.createdAt).toLocaleString('zh-CN', { hour12: false })));
+    timeline.append(item);
+  }
+}
+
+function render(detail) {
+  const { incident, plan } = detail;
+  const body = plan.body;
+  $('source').textContent = incident.source;
+  $('incident-id').textContent = incident.id;
+  $('incident-summary').textContent = incident.summary;
+  $('risk').textContent = riskLabels[body.risk] || body.risk;
+  $('risk-seal').dataset.risk = body.risk;
+  $('confidence').textContent = `置信度 ${Math.round(Number(body.confidence || 0) * 100)}%`;
+  $('root-cause').textContent = body.rootCause;
+  renderList($('policy-reasons'), plan.assessment.reasons.map(policyReason), '该方案按默认策略需要人工放行。');
+  $('plan-version').textContent = `PLAN V${plan.version}`;
+  $('plan-hash').textContent = plan.planHash;
+  $('plan-hash').title = plan.planHash;
+  $('rollback').textContent = body.rollback;
+  renderList($('verification'), body.verification, '未提供额外验证步骤');
+
+  const changes = $('changes');
+  changes.replaceChildren();
+  if (!body.proposedChanges?.length) changes.append(node('p', 'empty', '未计划修改仓库文件'));
+  for (const change of body.proposedChanges || []) {
+    const row = node('div', 'change-item');
+    row.append(node('code', '', change.path), node('span', '', change.reason));
+    changes.append(row);
+  }
+  const commands = $('commands');
+  commands.replaceChildren();
+  if (!body.commands?.length) commands.append(node('p', 'empty', '未计划执行额外命令'));
+  for (const command of body.commands || []) commands.append(node('code', '', command));
+
+  renderTimeline(detail);
+  const decided = plan.status !== 'proposed';
+  $('approve').disabled = decided;
+  $('reject').disabled = decided;
+  if (decided) $('decision-status').textContent = plan.status === 'approved' ? '这版方案已经批准。' : '这版方案已经拒绝。';
+  $('loading').classList.add('hidden');
+  $('approval').classList.remove('hidden');
+}
+
+async function decide(decision) {
+  $('approve').disabled = true;
+  $('reject').disabled = true;
+  $('decision-status').textContent = decision === 'approve' ? '正在锁定方案并派发修复任务…' : '正在拒绝这版方案…';
+  try {
+    const response = await fetch(`${API_BASE}/v1/public/decision`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ token, decision }) });
+    const body = await response.json();
+    if (!response.ok) throw new Error(body.error?.code || '操作失败');
+    $('decision-status').textContent = decision === 'approve' ? '已批准。修复任务已经发往本机桥接器。' : '已拒绝。本次修复不会执行。';
+    if (decision === 'approve') $('approve').textContent = '已批准，等待执行';
+    else $('reject').textContent = '已拒绝';
+  } catch (error) {
+    $('decision-status').textContent = `操作未完成：${error.message}`;
+    $('approve').disabled = false;
+    $('reject').disabled = false;
+  }
+}
+
+async function load() {
+  if (!token) return showError('链接中没有审批凭证。请从最新通知重新打开。');
+  try {
+    const response = await fetch(`${API_BASE}/v1/public/repair?token=${encodeURIComponent(token)}`);
+    const body = await response.json();
+    if (!response.ok) throw new Error(body.error?.code || '审批单读取失败');
+    render(body);
+  } catch (error) {
+    showError(`审批单无法读取：${error.message}`);
+  }
+}
+
+$('approve').addEventListener('click', () => decide('approve'));
+$('reject').addEventListener('click', () => decide('reject'));
+function updateClock() { $('clock').textContent = new Date().toLocaleTimeString('zh-CN', { hour12: false }); }
+updateClock();
+setInterval(updateClock, 1000);
+load();
+
+</script>
+</body>
+</html>
